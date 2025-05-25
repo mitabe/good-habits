@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Good Habits - Kebiasaan Orang-orang Sukses</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(to bottom, #e0f7fa, #ffffff);
+    margin: 0; padding: 0; color: #333;
+  }
+  header {
+    background-color: #00bcd4;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  header h1 {
+    margin: 0;
+    font-size: 2em;
+  }
+  .container {
+    max-width: 600px;
+    margin: 30px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  }
+  .activity-list {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    gap: 10px;
+    justify-content: center;
+  }
+  .activity-item {
+    background: #00bcd4;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    user-select: none;
+    font-weight: 600;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 188, 212, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+  }
+  .activity-item.disabled {
+    background: #90caf9;
+    cursor: default;
+    opacity: 0.8;
+  }
+  .activity-item .remove-btn {
+    position: absolute;
+    top: 2px;
+    right: 6px;
+    background: rgba(255,255,255,0.7);
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    color: #007c91;
+    font-weight: bold;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    user-select: none;
+    transition: background-color 0.3s ease;
+  }
+  .activity-item.disabled .remove-btn {
+    display: flex;
+  }
+  .activity-item .remove-btn:hover {
+    background: #fff;
+    color: #004a56;
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+    min-height: 100px;
+  }
+  li {
+    display: flex;
+    align-items: center;
+    background: #f5f5f5;
+    margin-bottom: 10px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 1.1em;
+    user-select: none;
+    color: #333;
+    cursor: pointer;
+  }
+  li.done {
+    background: #c8e6c9;
+    text-decoration: line-through;
+    color: #2e7d32;
+  }
+  .stats {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 1em;
+    color: #555;
+  }
+  footer {
+    text-align: center;
+    padding: 10px;
+    font-size: 0.85em;
+    color: gray;
+    margin-top: 40px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Good Habits 🌱</h1>
+  <p>Bangun rutinitas harian yang menyenangkan</p>
+</header>
+
+<div class="container">
+
+  <div class="activity-list" id="activityList"></div>
+
+  <ul id="taskList"></ul>
+
+  <div class="stats">
+    <span id="totalTasks">Total: 0</span> | 
+    <span id="doneTasks">Selesai: 0</span>
+  </div>
+</div>
+
+<footer>Semangat terus! Konsistensi adalah kunci keberhasilan!✨</footer>
+
+<script>
+  const taskList = document.getElementById('taskList');
+  const totalTasksSpan = document.getElementById('totalTasks');
+  const doneTasksSpan = document.getElementById('doneTasks');
+  const activityListDiv = document.getElementById('activityList');
+
+  const activities = [
+    { name: 'Bangun pagi', emoji: '🌅' },
+    { name: 'Meditasi', emoji: '🧘' },
+    { name: 'Olahraga', emoji: '🏋️' },
+    { name: 'Membaca buku', emoji: '📖' },
+    { name: 'Menulis jurnal', emoji: '📝' },
+    { name: 'Belajar skill baru', emoji: '📚' },
+    { name: 'Rencana kerja', emoji: '📋' },
+    { name: 'Kerja fokus', emoji: '💻' },
+    { name: 'Istirahat cukup', emoji: '😴' },
+    { name: 'Minum air putih', emoji: '💧' },
+    { name: 'Sarapan sehat', emoji: '🍎' },
+    { name: 'Bersih-bersih', emoji: '🧹' },
+    { name: 'Networking', emoji: '🤝' },
+    { name: 'Membuat konten', emoji: '🎥' },
+    { name: 'Sholat/Doa', emoji: '🙏' },
+    { name: 'Evaluasi hari', emoji: '🔍' },
+    { name: 'Senyum positif', emoji: '😊' },
+    { name: 'Tidur cukup', emoji: '🛌' },
+    { name: 'Mendengarkan podcast', emoji: '🎧' },
+    { name: 'Mengatur keuangan', emoji: '💰' },
+    { name: 'Meditasi singkat', emoji: '🧘‍♂️' },
+    { name: 'Makan siang sehat', emoji: '🥗' },
+    { name: 'Belajar bahasa', emoji: '🗣️' }
+  ];
+
+  function renderActivityList() {
+    activityListDiv.innerHTML = '';
+    activities.forEach((activity, index) => {
+      const item = document.createElement('div');
+      item.className = 'activity-item';
+      item.setAttribute('data-index', index);
+      item.innerHTML = `
+        <span>${activity.emoji} ${activity.name}</span>
+        <div class="remove-btn" title="Hapus tugas ini">&times;</div>
+      `;
+      item.onclick = (e) => {
+        if (e.target.classList.contains('remove-btn')) return;
+        addTask(activity, item);
+      };
+      item.querySelector('.remove-btn').onclick = (e) => {
+        e.stopPropagation();
+        removeTask(activity, item);
+      };
+      activityListDiv.appendChild(item);
+    });
+  }
+
+  function addTask(activity, buttonElement) {
+    const taskText = `${activity.emoji} ${activity.name}`;
+    const existingTasks = Array.from(taskList.children).map(li => li.textContent.trim());
+
+    if (existingTasks.includes(taskText)) {
+      alert('Tugas ini sudah ada di daftar!');
+      return;
+    }
+
+    const li = document.createElement('li');
+    li.textContent = taskText;
+
+    li.onclick = () => {
+      li.classList.toggle('done');
+      updateStats();
+    };
+
+    taskList.appendChild(li);
+    updateStats();
+
+    buttonElement.classList.add('disabled');
+  }
+
+  function removeTask(activity, buttonElement) {
+    const taskText = `${activity.emoji} ${activity.name}`;
+    const tasks = Array.from(taskList.children);
+    for (const li of tasks) {
+      if (li.textContent.trim() === taskText) {
+        li.remove();
+        break;
+      }
+    }
+    updateStats();
+    buttonElement.classList.remove('disabled');
+  }
+
+  function updateStats() {
+    const total = taskList.children.length;
+    const done = document.querySelectorAll('#taskList li.done').length;
+    totalTasksSpan.textContent = `Total: ${total}`;
+    doneTasksSpan.textContent = `Selesai: ${done}`;
+  }
+
+  renderActivityList();
+</script>
+
+</body>
+</html>
